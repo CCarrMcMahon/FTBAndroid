@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">FeedTheBeast</string>
+    <string name="email">Email</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Log In</string>
+    <string name="signup">Sign Up</string>
+    <string name="newuser">New User? <u>Click here</u> to create an account.</string>
+    <string name="existinguser">Existing User? <u>Click here</u> to login in.</string>
+
+</resources>
