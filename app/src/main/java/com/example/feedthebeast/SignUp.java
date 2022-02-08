@@ -2,7 +2,6 @@ package com.example.feedthebeast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
-import com.vishnusivadas.advanced_httpurlconnection.PutData;
 
 public class SignUp extends AppCompatActivity {
     private TextInputEditText tiet_SignUp_Email, tiet_SignUp_Username, tiet_SignUp_Password;
@@ -40,12 +38,14 @@ public class SignUp extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String email = tiet_SignUp_Email.getText().toString();
+                email = email.trim();
 
                 if (!Common.checkEmail(getApplicationContext(), email)) {
                     return;
                 }
 
                 String username = tiet_SignUp_Username.getText().toString();
+                username = username.trim();
 
                 if (!Common.checkUsername(getApplicationContext(), username)) {
                     return;
@@ -79,65 +79,59 @@ public class SignUp extends AppCompatActivity {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                //Starting Write and Read data with URL
-                //Creating array for parameters
+                // Creating array for parameters
                 String[] field = new String[3];
                 field[0] = "email";
                 field[1] = "username";
                 field[2] = "password";
 
-                //Creating array for data
+                // Creating array for data
                 String[] data = new String[3];
                 data[0] = email;
                 data[1] = username;
                 data[2] = password;
 
-                PutData putData = new PutData(Common.BASE_URL + "SignUp.php", "POST", field, data);
+                PhpHandler phpHandler = new PhpHandler(Common.BASE_URL + "SignUp.php", "POST", field, data);
+                phpHandler.sendRequest();
 
-                if (putData.startPut()) {
-                    if (putData.onComplete()) {
-                        pb_SignUp_ProgressBar.setVisibility(View.INVISIBLE);
-                        String result = putData.getResult();
+                if (phpHandler.resultReady()) {
+                    pb_SignUp_ProgressBar.setVisibility(View.INVISIBLE);
+                    String result = phpHandler.getResult();
+                    Common.showMessage(getApplicationContext(), result, Toast.LENGTH_SHORT);
 
-                        if (result.equals("Successfully signed up.")) {
+                    if (result.equals("Successfully signed up.")) {
+                        // Creating array for parameters
+                        String[] field2 = {field[1], field[2]};
+
+                        // Creating array for data
+                        String[] data2 = {data[1], data[2]};
+
+                        phpHandler = new PhpHandler(Common.BASE_URL + "LogIn.php", "POST", field2, data2);
+                        phpHandler.sendRequest();
+
+                        if (phpHandler.resultReady()) {
+                            result = phpHandler.getResult();
                             Common.showMessage(getApplicationContext(), result, Toast.LENGTH_SHORT);
+                            Intent intent = null;
 
-                            //Starting Write and Read data with URL
-                            //Creating array for parameters
-                            String[] field2 = {field[1], field[2]};
-
-                            //Creating array for data
-                            String[] data2 = {data[1], data[2]};
-
-                            putData = new PutData(Common.BASE_URL + "LogIn.php", "POST", field2, data2);
-
-                            if (putData.startPut()) {
-                                if (putData.onComplete()) {
-                                    result = putData.getResult();
-
-                                    if (result.equals("Successfully logged in.")) {
-                                        Common.showMessage(getApplicationContext(), result, Toast.LENGTH_SHORT);
-                                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    } else {
-                                        Common.showMessage(getApplicationContext(), result, Toast.LENGTH_SHORT);
-                                        Intent intent = new Intent(getApplicationContext(), LogIn.class);
-                                        startActivity(intent);
-                                        finish();
-                                    }
-
-                                    Log.i("PutData", result);
-                                }
+                            if (result.equals("Successfully logged in.")) {
+                                Common.username = username;
+                                intent = new Intent(getApplicationContext(), Devices.class);
+                            } else {
+                                intent = new Intent(getApplicationContext(), LogIn.class);
                             }
-                        } else {
-                            Common.showMessage(getApplicationContext(), result, Toast.LENGTH_SHORT);
-                        }
 
-                        Log.i("PutData", result);
+                            Log.println(Log.VERBOSE, "PutData", result);
+
+                            startActivity(intent);
+                            finish();
+                        }
                     }
+
+                    Log.println(Log.VERBOSE, "PutData", result);
                 }
             }
+
         });
     }
 }

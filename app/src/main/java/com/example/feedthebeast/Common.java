@@ -7,11 +7,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Common {
-    public static final String BASE_URL = "http://fdbc-69-80-148-27.ngrok.io/login_signup/";
+    // ngrok http 80 <-- Send PHP requests to port 80
+    public static final String BASE_URL = "http://c877-69-80-148-139.ngrok.io/FTBServer/login_signup/";
+    public static final String SIGNUP_URL = BASE_URL + "SignUp.php";
+    public static final String LOGIN_URL = BASE_URL + "LogIn.php";
+    public static final String DEVICES_URL = BASE_URL + "Devices.php";
     public static final String EMAIL_EMPTY = "The email must not be empty.";
     public static final String EMAIL_INVALID = "The email provided is invalid.";
     public static final String USERNAME_EMPTY = "The username must not be empty.";
     public static final String PASSWORD_EMPTY = "The password must not be empty.";
+
+
+    public static String username = "CCarrMcMahon";
 
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+" +
@@ -40,7 +47,7 @@ public class Common {
     }
 
     public static boolean checkEmail(Context context, String email) {
-        if (email.equals("")) {
+        if (email.isEmpty()) {
             Common.showMessage(context, Common.EMAIL_EMPTY, Toast.LENGTH_SHORT);
             return false;
         }
@@ -54,7 +61,7 @@ public class Common {
     }
 
     public static boolean checkUsername(Context context, String username) {
-        if (username.equals("")) {
+        if (username.isEmpty()) {
             Common.showMessage(context, Common.USERNAME_EMPTY, Toast.LENGTH_SHORT);
             return false;
         }
@@ -63,7 +70,7 @@ public class Common {
     }
 
     public static boolean checkPassword(Context context, String password) {
-        if (password.equals("")) {
+        if (password.isEmpty()) {
             Common.showMessage(context, Common.PASSWORD_EMPTY, Toast.LENGTH_SHORT);
             return false;
         }
