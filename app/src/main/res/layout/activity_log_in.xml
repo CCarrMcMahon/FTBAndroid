@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".LogIn">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_LogIn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorAccent"
+        android:elevation="4dp"
+        android:minHeight="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/tv_LogIn_LogIn"
         android:layout_width="0dp"
@@ -15,17 +26,17 @@
         android:textAlignment="center"
         android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_LogIn" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_LogIn_Username"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
-        android:hint="@string/username"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_LogIn_LogIn">
@@ -33,29 +44,35 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/tiet_LogIn_Username"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableEnd="@drawable/ic_username" />
+            android:layout_height="match_parent"
+            android:digits="@string/alphanumericcustom"
+            android:drawableEnd="@drawable/ic_username"
+            android:hint="@string/username"
+            android:inputType="textCapSentences"
+            android:maxLength="32"
+            android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/til_LogIn_Password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
-        android:hint="@string/password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/til_LogIn_Username">
 
-
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/tiet_LogIn_Password"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:drawableEnd="@drawable/ic_password"
+            android:hint="@string/password"
             android:inputType="textPassword"
-            android:drawableEnd="@drawable/ic_password" />
+            android:maxLength="64"
+            android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <ProgressBar
@@ -63,7 +80,7 @@
         style="?android:attr/progressBarStyle"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="8dp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -75,11 +92,12 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
         android:text="@string/login"
         android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/pb_LogIn_ProgressBar" />
 
@@ -91,7 +109,6 @@
         android:text="@string/newuser"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_LogIn_LogIn" />
 
