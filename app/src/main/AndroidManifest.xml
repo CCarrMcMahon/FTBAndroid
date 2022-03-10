@@ -28,7 +28,7 @@
         android:theme="@style/Theme.FeedTheBeast"
         android:usesCleartextTraffic="true">
 
-        <activity android:name=".Bluetooth">
+        <activity android:name=".BluetoothList">
 
         </activity>
 
@@ -47,8 +47,8 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity
-            android:name=".Devices"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            android:name=".FeederList"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

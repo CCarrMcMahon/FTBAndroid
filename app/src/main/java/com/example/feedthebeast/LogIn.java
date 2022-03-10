@@ -91,7 +91,7 @@ public class LogIn extends AppCompatActivity {
 
                     if (result.equals("Successfully logged in.")) {
                         Common.username = username;
-                        Intent intent = new Intent(getApplicationContext(), Devices.class);
+                        Intent intent = new Intent(getApplicationContext(), FeederList.class);
                         startActivity(intent);
                         finish();
                     }

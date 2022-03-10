@@ -1,34 +1,35 @@
 package com.example.feedthebeast;
 
-import android.content.Context;
+import android.companion.BluetoothDeviceFilter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-    public String[] names;
+public class BluetoothListRVA extends RecyclerView.Adapter<BluetoothListRVA.ViewHolder> {
+    public List<String> names = new ArrayList<String>();
 
     // The adapter creates ViewHolder objects as needed
-    public MyAdapter(String[] names) {
-        this.names = names;
+    public BluetoothListRVA() {
+
     }
 
     // The ViewHolder is a wrapper around a view that contains the layout for each individual item
     // in the list.
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView deviceName;
+        private final TextView bluetoothName;
 
         public ViewHolder(@NonNull View view) {
             super(view);
 
-            this.deviceName = (TextView) view.findViewById(R.id.tv_deviceName);
+            this.bluetoothName = (TextView) view.findViewById(R.id.tv_BluetoothName);
         }
     }
 
@@ -38,7 +39,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View view = layoutInflater.inflate(R.layout.device_row, parent, false);
+        View view = layoutInflater.inflate(R.layout.bluetooth_list_row, parent, false);
 
         return new ViewHolder(view);
     }
@@ -46,12 +47,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     // RecyclerView calls this method to associate a ViewHolder with its data.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.deviceName.setText(names[position]);
+        holder.bluetoothName.setText(names.get(position));
     }
 
     // Returns the amount of items in the recycler list.
     @Override
     public int getItemCount() {
-        return names.length;
+        return names.size();
     }
 }

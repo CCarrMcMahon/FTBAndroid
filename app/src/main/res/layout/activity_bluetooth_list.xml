@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Bluetooth">
+    tools:context=".BluetoothList">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_Bluetooth"
+        android:id="@+id/tb_BluetoothList"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorAccent"
@@ -18,18 +18,13 @@
         app:layout_constraintTop_toTopOf="parent"
         app:title="Bluetooth Devices" />
 
-    <ScrollView
-        android:id="@+id/sv_Bluetooth_Devices"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_BluetoothList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_Bluetooth">
+        app:layout_constraintTop_toBottomOf="@+id/tb_BluetoothList" />
 
-        <TextView
-            android:id="@+id/tv_Bluetooth_Devices"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-    </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

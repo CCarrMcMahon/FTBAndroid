@@ -8,15 +8,14 @@ import java.util.regex.Pattern;
 
 public class Common {
     // ngrok http 80 <-- Send PHP requests to port 80
-    public static final String BASE_URL = "http://c877-69-80-148-139.ngrok.io/FTBServer/login_signup/";
+    public static final String BASE_URL = "http://41e4-73-65-121-194.ngrok.io/FTBServer/login_signup/";
     public static final String SIGNUP_URL = BASE_URL + "SignUp.php";
     public static final String LOGIN_URL = BASE_URL + "LogIn.php";
-    public static final String DEVICES_URL = BASE_URL + "Devices.php";
+    public static final String FEEDERS_URL = BASE_URL + "FeederList.php";
     public static final String EMAIL_EMPTY = "The email must not be empty.";
     public static final String EMAIL_INVALID = "The email provided is invalid.";
     public static final String USERNAME_EMPTY = "The username must not be empty.";
     public static final String PASSWORD_EMPTY = "The password must not be empty.";
-
 
     public static String username = "CCarrMcMahon";
 

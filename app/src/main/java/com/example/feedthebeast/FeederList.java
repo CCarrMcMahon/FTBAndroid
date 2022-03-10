@@ -12,53 +12,55 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class Devices extends AppCompatActivity {
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class FeederList extends AppCompatActivity {
+    FeederListRVA feederListRVA;
+
     Toolbar toolbar;
     RecyclerView recyclerView;
-    FloatingActionButton fab;
 
-    Button btnStartScanning = null;
-    String[] device_list;
+    FloatingActionButton fab;
+    Button btn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_devices);
+        setContentView(R.layout.activity_feeder_list);
 
-        toolbar = findViewById(R.id.toolbar_Devices);
-        recyclerView = findViewById(R.id.recyclerView_Devices);
+        feederListRVA = new FeederListRVA();
 
-
+        toolbar = findViewById(R.id.tb_FeederList);
         setSupportActionBar(toolbar);
 
-        getDevices(Common.username);
-
-        MyAdapter myAdapter = new MyAdapter(device_list);
-
-        recyclerView.setAdapter(myAdapter);
+        recyclerView = findViewById(R.id.rv_FeederList);
+        recyclerView.setAdapter(feederListRVA);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        fab = findViewById(R.id.fab_Devices_Add);
+        getFeeders(Common.username);
+
+        fab = findViewById(R.id.fab_FeederList_Add);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                 Intent intent = new Intent(getApplicationContext(), Bluetooth.class);
+                 Intent intent = new Intent(getApplicationContext(), BluetoothList.class);
                  startActivity(intent);
             }
         });
 
-        btnStartScanning = findViewById(R.id.btn_Devices_Scan);
-        btnStartScanning.setOnClickListener(new View.OnClickListener() {
+        btn = findViewById(R.id.btn_FeederList_Scan);
+        btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getDevices(Common.username);
-                myAdapter.names = device_list;
-                myAdapter.notifyItemRangeChanged(0, device_list.length);
+                getFeeders(Common.username);
             }
         });
     }
 
-    public void getDevices(String username) {
+    public void getFeeders(String username) {
         // Creating array for parameters
         String[] field = new String[1];
         field[0] = "username";
@@ -67,13 +69,22 @@ public class Devices extends AppCompatActivity {
         String[] data = new String[1];
         data[0] = username;
 
-        PhpHandler phpHandler = new PhpHandler(Common.DEVICES_URL, "POST", field, data);
+        PhpHandler phpHandler = new PhpHandler(Common.FEEDERS_URL, "POST", field, data);
 
         phpHandler.sendRequest();
 
         if (phpHandler.resultReady()) {
             String result = phpHandler.getResult();
-            device_list = result.split("\n");
+
+            String[] result_array = result.split("\n");
+
+            if (result_array.length == 1 && result_array[0].equals("")) {
+                feederListRVA.names.clear();
+            } else {
+                feederListRVA.names = Arrays.asList(result_array);
+            }
+
+            feederListRVA.notifyDataSetChanged();
         }
     }
 }
