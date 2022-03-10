@@ -116,7 +116,7 @@ public class SignUp extends AppCompatActivity {
 
                             if (result.equals("Successfully logged in.")) {
                                 Common.username = username;
-                                intent = new Intent(getApplicationContext(), Devices.class);
+                                intent = new Intent(getApplicationContext(), FeederList.class);
                             } else {
                                 intent = new Intent(getApplicationContext(), LogIn.class);
                             }

@@ -1,72 +1,61 @@
 package com.example.feedthebeast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.IntentSenderRequest;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanFilter;
-import android.bluetooth.le.ScanResult;
-import android.companion.AssociationRequest;
-import android.companion.BluetoothDeviceFilter;
-import android.companion.CompanionDeviceManager;
-import android.companion.DeviceFilter;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Bluetooth extends AppCompatActivity {
+public class BluetoothList extends AppCompatActivity {
     private static final String UNSUPPORTED_BLUETOOTH = "This device does not support bluetooth and is required.";
     private static final String DENIED_BLUETOOTH = "Please enable bluetooth to use this app.";
     private static final String DENIED_LOCATION = "Please enable location to use this app.";
+    private static final String FAILED_SCAN = "Failed to start scanning.";
+    private static final String DISCOVERY_START = "Started Discovery";
+    private static final String DISCOVERY_END = "Finished Discovery";
 
     private static final int REQUEST_ENABLE_LOCATION = 0;
 
     public static final Pattern VALID_DEVICE_REGEX = Pattern.compile("(DSD) .+");
+    // public static final Pattern VALID_DEVICE_REGEX = Pattern.compile(".*");
 
     BluetoothAdapter bluetoothAdapter = null;
     Context context = this;
 
-    StringBuilder info = new StringBuilder();
-    TextView tv_Bluetooth_Devices;
+    BluetoothListRVA bluetoothListRVA;
 
-    // Activity request to handle enabling bluetooth
+    Toolbar toolbar;
+    RecyclerView recyclerView;
+
+    // Activity request to handle enabling Bluetooth
     ActivityResultLauncher<Intent> requestBluetoothEnable = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() != Activity.RESULT_OK) {
                     Common.showMessage(context, DENIED_BLUETOOTH, Toast.LENGTH_SHORT);
-                    Intent intent = new Intent(getApplicationContext(), Devices.class);
+                    Intent intent = new Intent(getApplicationContext(), FeederList.class);
                     startActivity(intent);
                     finish();
                 }
@@ -76,7 +65,7 @@ public class Bluetooth extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bluetooth);
+        setContentView(R.layout.activity_bluetooth_list);
 
         // Select the Bluetooth adapter
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -95,7 +84,7 @@ public class Bluetooth extends AppCompatActivity {
             requestBluetoothEnable.launch(enableBluetoothIntent);
         }
 
-        // Users need to allow access to location for bluetooth
+        // Users need to allow access to location for Bluetooth
         checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, 0);
 
         // Register for broadcasts when a device is discovered.
@@ -106,38 +95,18 @@ public class Bluetooth extends AppCompatActivity {
 
         registerReceiver(discovery_receiver, filter);
 
-//        // Get a list of paired devices
-//        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-//
-//        if (pairedDevices.size() > 0) {
-//            // There are paired devices. Get the name and address of each paired device.
-//            for (BluetoothDevice device : pairedDevices) {
-//                String deviceName = device.getName();
-//                String deviceHardwareAddress = device.getAddress(); // MAC address
-//
-//                info.append(deviceName).append(" | ").append(deviceHardwareAddress).append("\n");
-//            }
-//
-//            viewInfo.setText(info);
-//        }
+        bluetoothListRVA = new BluetoothListRVA();
 
-        tv_Bluetooth_Devices = findViewById(R.id.tv_Bluetooth_Devices);
+        toolbar = findViewById(R.id.tb_BluetoothList);
+        setSupportActionBar(toolbar);
+
+        recyclerView = findViewById(R.id.rv_BluetoothList);
+        recyclerView.setAdapter(bluetoothListRVA);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         if (!bluetoothAdapter.startDiscovery()) {
-            info.append("Failed to start scanning\n");
-            tv_Bluetooth_Devices.setText(info);
+            Common.showMessage(context, FAILED_SCAN, Toast.LENGTH_SHORT);
         }
-
-//        if (bluetoothAdapter.isDiscovering()) {
-//            bluetoothAdapter.cancelDiscovery();
-//            info.append("Was Scanning\n");
-//            tv_Bluetooth_Devices.setText(info);
-//        }
-//
-//        if (!bluetoothAdapter.startDiscovery()) {
-//            info.append("Failed to start scanning\n");
-//            tv_Bluetooth_Devices.setText(info);
-//        }
     }
 
     public void checkPermission(String permission, int requestCode) {
@@ -161,8 +130,8 @@ public class Bluetooth extends AppCompatActivity {
                         }
                     }
 
-                    Toast.makeText(context, DENIED_LOCATION, Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getApplicationContext(), Devices.class);
+                    Common.showMessage(context, DENIED_LOCATION, Toast.LENGTH_SHORT);
+                    Intent intent = new Intent(getApplicationContext(), FeederList.class);
                     startActivity(intent);
                     finish();
                     return;
@@ -185,8 +154,23 @@ public class Bluetooth extends AppCompatActivity {
 
             switch (action) {
                 case BluetoothAdapter.ACTION_DISCOVERY_STARTED:
-                    info.append("Started Discovery\n");
-                    tv_Bluetooth_Devices.setText(info);
+                    Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
+                    bluetoothListRVA.names.clear();
+
+//                    // Get a list of paired devices
+//                    Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+//
+//                    if (pairedDevices.size() > 0) {
+//                        // There are paired devices. Get the name and address of each paired device.
+//                        for (BluetoothDevice device : pairedDevices) {
+//                            String deviceName = device.getName();
+//                            String deviceAddress = device.getAddress(); // MAC address
+//
+//                            bluetoothListRVA.names.add(deviceName + "\n" + deviceAddress);
+//                            bluetoothListRVA.notifyDataSetChanged();
+//                        }
+//                    }
+
                     break;
 
                 case BluetoothDevice.ACTION_FOUND:
@@ -208,15 +192,14 @@ public class Bluetooth extends AppCompatActivity {
                     Matcher matcher = VALID_DEVICE_REGEX.matcher(deviceName);
 
                     if (matcher.matches()) {
-                        info.append(deviceName).append(" | ").append(deviceAddress).append("\n");
-                        tv_Bluetooth_Devices.setText(info);
+                        bluetoothListRVA.names.add(deviceName + "\n" + deviceAddress);
+                        bluetoothListRVA.notifyDataSetChanged();
                     }
 
                     break;
 
                 case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
-                    info.append("Finished Discovery\n");
-                    tv_Bluetooth_Devices.setText(info);
+                    Common.showMessage(context, DISCOVERY_END, Toast.LENGTH_SHORT);
                     break;
 
                 default:
