@@ -69,6 +69,10 @@ public class WiFiDetails extends AppCompatActivity {
         btn_connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                BTConnectThread btConnectThread = new BTConnectThread(bluetoothDevice);
+                btConnectThread.start();
+
+
                 pb.setVisibility(View.VISIBLE);
 
 
