@@ -2,6 +2,7 @@ package com.example.feedthebeast;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.ParcelUuid;
 import android.util.Log;
 
 import java.io.IOException;
@@ -25,7 +26,9 @@ public class BTConnectThread extends Thread {
         } catch (IOException e) {
             Log.e("BTConnectThread", "Socket's create() method failed", e);
         }
+
         mmSocket = tmp;
+        Log.d("BTConnectThread", "Socket created");
     }
 
     public void run() {
@@ -40,17 +43,22 @@ public class BTConnectThread extends Thread {
             } catch (IOException closeException) {
                 Log.e("BTConnectThread", "Could not close the client socket", closeException);
             }
+            Log.d("BTConnectThread", "Couldn't connect to socket", connectException);
+
             return;
         }
 
         // The connection attempt succeeded. Perform work associated with
         // the connection in a separate thread.
         BTConnectedThread btConnectedThread = new BTConnectedThread(mmSocket);
-        btConnectedThread.run();
+        btConnectedThread.start();
+        Log.d("BTConnectThread", "ConnectedThread created");
 
         while (btConnectedThread.isAlive()) {
 
         }
+
+        Log.d("BTConnectThread", "ConnectedThread closed");
 
         cancel();
     }
