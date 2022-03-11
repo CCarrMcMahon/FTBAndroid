@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,15 +40,14 @@ public class BluetoothList extends AppCompatActivity {
     private static final int REQUEST_ENABLE_LOCATION = 0;
 
     public static final Pattern VALID_DEVICE_REGEX = Pattern.compile("(DSD) .+");
-    // public static final Pattern VALID_DEVICE_REGEX = Pattern.compile(".*");
 
-    BluetoothAdapter bluetoothAdapter = null;
-    Context context = this;
+    private final Context context = this;
 
-    BluetoothListRVA bluetoothListRVA;
+    private BluetoothAdapter bluetoothAdapter;
+    private BluetoothListRVA bluetoothListRVA;
 
-    Toolbar toolbar;
-    RecyclerView recyclerView;
+    private Toolbar toolbar;
+    private RecyclerView recyclerView;
 
     // Activity request to handle enabling Bluetooth
     ActivityResultLauncher<Intent> requestBluetoothEnable = registerForActivityResult(
@@ -95,20 +95,27 @@ public class BluetoothList extends AppCompatActivity {
 
         registerReceiver(discovery_receiver, filter);
 
-        bluetoothListRVA = new BluetoothListRVA();
-
+        // Create the toolbar and add a back button
         toolbar = findViewById(R.id.tb_BluetoothList);
         setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        // Create RecyclerView Adapter to handle displaying information
+        bluetoothListRVA = new BluetoothListRVA(context);
+
+        // Link the RecyclerView Adapter to the RecyclerView object
         recyclerView = findViewById(R.id.rv_BluetoothList);
         recyclerView.setAdapter(bluetoothListRVA);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Start scanning for Bluetooth devices and tell the user if the scan failed to start
         if (!bluetoothAdapter.startDiscovery()) {
             Common.showMessage(context, FAILED_SCAN, Toast.LENGTH_SHORT);
         }
     }
 
+    // Method used to check for Bluetooth permissions
     public void checkPermission(String permission, int requestCode) {
         if (checkSelfPermission(permission) != PackageManager.PERMISSION_DENIED) {
             requestPermissions(new String[] { permission }, requestCode);
@@ -116,6 +123,7 @@ public class BluetoothList extends AppCompatActivity {
     }
 
     @Override
+    // Method used to request Bluetooth permissions to be granted
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         try {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -155,21 +163,7 @@ public class BluetoothList extends AppCompatActivity {
             switch (action) {
                 case BluetoothAdapter.ACTION_DISCOVERY_STARTED:
                     Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
-                    bluetoothListRVA.names.clear();
-
-//                    // Get a list of paired devices
-//                    Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-//
-//                    if (pairedDevices.size() > 0) {
-//                        // There are paired devices. Get the name and address of each paired device.
-//                        for (BluetoothDevice device : pairedDevices) {
-//                            String deviceName = device.getName();
-//                            String deviceAddress = device.getAddress(); // MAC address
-//
-//                            bluetoothListRVA.names.add(deviceName + "\n" + deviceAddress);
-//                            bluetoothListRVA.notifyDataSetChanged();
-//                        }
-//                    }
+                    bluetoothListRVA.clearDevices();
 
                     break;
 
@@ -178,21 +172,10 @@ public class BluetoothList extends AppCompatActivity {
                     // object and its info from the Intent.
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                    String deviceName = device.getName();
-                    String deviceAddress = device.getAddress(); // MAC address
-
-                    if (deviceName == null) {
-                        deviceName = "NULL";
-                    }
-
-                    if (deviceAddress == null) {
-                        deviceAddress = "NULL";
-                    }
-
-                    Matcher matcher = VALID_DEVICE_REGEX.matcher(deviceName);
+                    Matcher matcher = VALID_DEVICE_REGEX.matcher(String.valueOf(device.getName()));
 
                     if (matcher.matches()) {
-                        bluetoothListRVA.names.add(deviceName + "\n" + deviceAddress);
+                        bluetoothListRVA.addToDevices(device);
                         bluetoothListRVA.notifyDataSetChanged();
                     }
 
