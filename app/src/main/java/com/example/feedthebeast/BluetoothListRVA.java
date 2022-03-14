@@ -1,6 +1,5 @@
 package com.example.feedthebeast;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
@@ -26,11 +25,17 @@ public class BluetoothListRVA extends RecyclerView.Adapter<BluetoothListRVA.View
     }
 
     public void addToDevices(BluetoothDevice device) {
+        if (devices.contains(device)) {
+            return;
+        }
+
         devices.add(device);
+        notifyDataSetChanged();
     }
 
     public void clearDevices() {
         devices.clear();
+        notifyDataSetChanged();
     }
 
     // The ViewHolder is a wrapper around a view that contains the layout for each individual item
@@ -71,6 +76,8 @@ public class BluetoothListRVA extends RecyclerView.Adapter<BluetoothListRVA.View
         holder.bluetoothRow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ((BluetoothList) parentContext).stopBLEScan();
+
                 Intent intent = new Intent(parentContext, WiFiDetails.class);
                 intent.putExtra("device", device);
                 parentContext.startActivity(intent);
