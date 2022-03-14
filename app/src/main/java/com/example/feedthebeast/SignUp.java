@@ -91,7 +91,7 @@ public class SignUp extends AppCompatActivity {
                 data[1] = username;
                 data[2] = password;
 
-                PhpHandler phpHandler = new PhpHandler(Common.BASE_URL + "SignUp.php", "POST", field, data);
+                PhpHandler phpHandler = new PhpHandler(Common.SIGNUP_URL, "POST", field, data);
                 phpHandler.sendRequest();
 
                 if (phpHandler.resultReady()) {
@@ -106,7 +106,7 @@ public class SignUp extends AppCompatActivity {
                         // Creating array for data
                         String[] data2 = {data[1], data[2]};
 
-                        phpHandler = new PhpHandler(Common.BASE_URL + "LogIn.php", "POST", field2, data2);
+                        phpHandler = new PhpHandler(Common.LOGIN_URL, "POST", field2, data2);
                         phpHandler.sendRequest();
 
                         if (phpHandler.resultReady()) {

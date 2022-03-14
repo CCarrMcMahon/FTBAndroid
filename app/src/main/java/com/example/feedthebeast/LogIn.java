@@ -81,7 +81,7 @@ public class LogIn extends AppCompatActivity {
                 data[0] = username;
                 data[1] = password;
 
-                PhpHandler phpHandler = new PhpHandler(Common.BASE_URL + "LogIn.php", "POST", field, data);
+                PhpHandler phpHandler = new PhpHandler(Common.LOGIN_URL, "POST", field, data);
                 phpHandler.sendRequest();
 
                 if (phpHandler.resultReady()) {

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FeederListRVA extends RecyclerView.Adapter<FeederListRVA.ViewHolder> {
-    public List<String> names = new ArrayList<String>();
+    public List<String> names = new ArrayList<>();
 
     // The adapter creates ViewHolder objects as needed
     public FeederListRVA() {
