@@ -12,20 +12,20 @@ import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,11 +33,12 @@ public class BluetoothList extends AppCompatActivity {
     private static final String UNSUPPORTED_BLUETOOTH = "This device does not support bluetooth and is required.";
     private static final String DENIED_BLUETOOTH = "Please enable bluetooth to use this app.";
     private static final String DENIED_LOCATION = "Please enable location to use this app.";
-    private static final String FAILED_SCAN = "Failed to start scanning.";
     private static final String DISCOVERY_START = "Started Discovery";
     private static final String DISCOVERY_END = "Finished Discovery";
 
     private static final int REQUEST_ENABLE_LOCATION = 0;
+
+    private static final long SCAN_PERIOD = 10000;
 
     public static final Pattern VALID_DEVICE_REGEX = Pattern.compile("(DSD) .+");
 
@@ -48,6 +49,10 @@ public class BluetoothList extends AppCompatActivity {
 
     private Toolbar toolbar;
     private RecyclerView recyclerView;
+
+    private BluetoothLeScanner bluetoothLeScanner;
+    private boolean isScanning = false;
+    private Handler handler;
 
     // Activity request to handle enabling Bluetooth
     ActivityResultLauncher<Intent> requestBluetoothEnable = registerForActivityResult(
@@ -61,6 +66,48 @@ public class BluetoothList extends AppCompatActivity {
                 }
             }
     );
+
+    private final ScanCallback leScanCallback =
+            new ScanCallback() {
+                @Override
+                public void onScanResult(int callbackType, ScanResult result) {
+                    super.onScanResult(callbackType, result);
+
+                    BluetoothDevice device = result.getDevice();
+
+                    Matcher matcher = VALID_DEVICE_REGEX.matcher(String.valueOf(device.getName()));
+
+                    if (matcher.matches()) {
+                        bluetoothListRVA.addToDevices(device);
+                    }
+                }
+            };
+
+    public void startBLEScan() {
+        if (!isScanning) {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (isScanning) {
+                        stopBLEScan();
+                    }
+                }
+            }, SCAN_PERIOD);
+
+            bluetoothListRVA.clearDevices();
+            bluetoothLeScanner.startScan(leScanCallback);
+            isScanning = true;
+            Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
+        }
+    }
+
+    public void stopBLEScan() {
+        if (isScanning) {
+            bluetoothLeScanner.stopScan(leScanCallback);
+            isScanning = false;
+            Common.showMessage(context, DISCOVERY_END, Toast.LENGTH_SHORT);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +140,7 @@ public class BluetoothList extends AppCompatActivity {
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 
-        registerReceiver(discovery_receiver, filter);
+        // registerReceiver(discovery_receiver, filter);
 
         // Create the toolbar and add a back button
         toolbar = findViewById(R.id.tb_BluetoothList);
@@ -109,10 +156,11 @@ public class BluetoothList extends AppCompatActivity {
         recyclerView.setAdapter(bluetoothListRVA);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Start scanning for Bluetooth devices and tell the user if the scan failed to start
-        if (!bluetoothAdapter.startDiscovery()) {
-            Common.showMessage(context, FAILED_SCAN, Toast.LENGTH_SHORT);
-        }
+        // Initialize LE Scan objects
+        bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+        handler = new Handler(Looper.getMainLooper());
+
+        startBLEScan();
     }
 
     // Method used to check for Bluetooth permissions
@@ -154,50 +202,10 @@ public class BluetoothList extends AppCompatActivity {
         }
     }
 
-    // Create a BroadcastReceiver for discovery mode
-    private final BroadcastReceiver discovery_receiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-
-            switch (action) {
-                case BluetoothAdapter.ACTION_DISCOVERY_STARTED:
-                    Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
-                    bluetoothListRVA.clearDevices();
-
-                    break;
-
-                case BluetoothDevice.ACTION_FOUND:
-                    // Discovery has found a device. Get the BluetoothDevice
-                    // object and its info from the Intent.
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                    Matcher matcher = VALID_DEVICE_REGEX.matcher(String.valueOf(device.getName()));
-
-                    if (matcher.matches()) {
-                        bluetoothListRVA.addToDevices(device);
-                        bluetoothListRVA.notifyDataSetChanged();
-                    }
-
-                    break;
-
-                case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
-                    Common.showMessage(context, DISCOVERY_END, Toast.LENGTH_SHORT);
-                    break;
-
-                default:
-                    break;
-            }
-        }
-    };
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        // Don't forget to unregister the discovery_receiver.
-        unregisterReceiver(discovery_receiver);
-
-        bluetoothAdapter.cancelDiscovery();
+        stopBLEScan();
     }
 }

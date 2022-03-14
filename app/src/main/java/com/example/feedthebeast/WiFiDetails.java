@@ -28,7 +28,6 @@ public class WiFiDetails extends AppCompatActivity {
     private Button btn_connect;
     private TextView tv_WiFiInfo;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,20 +68,11 @@ public class WiFiDetails extends AppCompatActivity {
         btn_connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BTConnectThread btConnectThread = new BTConnectThread(bluetoothDevice);
-                btConnectThread.start();
-
+                // BTConnectThread btConnectThread = new BTConnectThread(bluetoothDevice);
+                // btConnectThread.start();
 
                 pb.setVisibility(View.VISIBLE);
-
-
-
             }
         });
-
-
-
-
-
     }
 }
