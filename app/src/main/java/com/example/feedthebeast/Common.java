@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class Common {
     // ngrok http 80 <-- Send PHP requests to port 80
-    public static final String BASE_URL = "http://41e4-73-65-121-194.ngrok.io/FTBServer/login_signup/";
+    public static final String BASE_URL = "http://a8e8-69-80-148-181.ngrok.io/FTBServer/login_signup/";
     public static final String SIGNUP_URL = BASE_URL + "SignUp.php";
     public static final String LOGIN_URL = BASE_URL + "LogIn.php";
     public static final String FEEDERS_URL = BASE_URL + "FeederList.php";
