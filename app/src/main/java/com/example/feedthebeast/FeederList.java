@@ -78,7 +78,9 @@ public class FeederList extends AppCompatActivity {
 
             String[] result_array = result.split("\n");
 
-            if (result_array[0].equals("No feeders found.")) {
+            if (result_array.length == 1 && result_array[0].equals("")) {
+                feederListRVA.names.clear();
+            } else if (result_array[0].equals("No feeders found.")) {
                 feederListRVA.names.clear();
             } else {
                 feederListRVA.names = Arrays.asList(result_array);
