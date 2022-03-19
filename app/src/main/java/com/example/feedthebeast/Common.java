@@ -3,6 +3,7 @@ package com.example.feedthebeast;
 import android.content.Context;
 import android.widget.Toast;
 
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +17,9 @@ public class Common {
     public static final String EMAIL_INVALID = "The email provided is invalid.";
     public static final String USERNAME_EMPTY = "The username must not be empty.";
     public static final String PASSWORD_EMPTY = "The password must not be empty.";
+
+    public static final UUID SERVICE_UUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
+    public static final UUID CHARACTERISTIC_UUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
 
     public static String username = "CCarrMcMahon";
 

@@ -13,8 +13,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import java.util.List;
-
 public class BluetoothLeService extends Service {
     private final static String TAG = BluetoothLeService.class.getSimpleName();
 
@@ -23,13 +21,15 @@ public class BluetoothLeService extends Service {
     private final Binder binder = new LocalBinder();
     private byte[] valueToWrite;
 
-    public final static String ACTION_GATT_CONNECTED = "com.example.feedthebeast.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED = "com.example.feedthebeast.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.example.feedthebeast.ACTION_GATT_SERVICES_DISCOVERED";
-    public static final String ACTION_GATT_DATA_AVAILABLE = "com.example.feedthebeast.ACTION_GATT_DATA_AVAILABLE";
+    public static final String ACTION_GATT_CONNECTED = "com.example.feedthebeast.ACTION_GATT_CONNECTED";
+    public static final String ACTION_GATT_DISCONNECTED = "com.example.feedthebeast.ACTION_GATT_DISCONNECTED";
+    public static final String ACTION_GATT_SERVICES_DISCOVERED = "com.example.feedthebeast.ACTION_GATT_SERVICES_DISCOVERED";
+    public static final String ACTION_GATT_READ_SUCCESSFUL = "com.example.feedthebeast.ACTION_GATT_READ_SUCCESSFUL";
     public static final String ACTION_GATT_WRITE_SUCCESSFUL = "com.example.feedthebeast.ACTION_GATT_WRITE_SUCCESSFUL";
+    public static final String ACTION_GATT_CHARACTERISTIC_CHANGED = "com.example.feedthebeast.ACTION_GATT_CHARACTERISTIC_CHANGED";
     public static final String EXTRA_DATA = "com.example.feedthebeast.EXTRA_DATA";
 
+    // region Creation
     public BluetoothLeService() {
 
     }
@@ -46,20 +46,22 @@ public class BluetoothLeService extends Service {
     public IBinder onBind(Intent intent) {
         return binder;
     }
+    // endregion
 
+    // region Broadcasting
     // Method to broadcast actions to a receiver
-    private void broadcastUpdate(final String action) {
-        final Intent intent = new Intent(action);
+    private void broadcastUpdate(String action) {
+        Intent intent = new Intent(action);
         sendBroadcast(intent);
     }
 
     // Method to broadcast characteristics to a receiver
-    private void broadcastUpdate(final String action, final BluetoothGattCharacteristic characteristic) {
-        final Intent intent = new Intent(action);
-        final byte[] data = characteristic.getValue();
+    private void broadcastUpdate(String action, BluetoothGattCharacteristic characteristic) {
+        Intent intent = new Intent(action);
+        byte[] data = characteristic.getValue();
 
         if (data != null && data.length > 0) {
-            final StringBuilder stringBuilder = new StringBuilder(data.length);
+            StringBuilder stringBuilder = new StringBuilder(data.length);
 
             for (byte byteChar : data) {
                 stringBuilder.append(String.format("%02X ", byteChar));
@@ -106,10 +108,10 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(ACTION_GATT_DATA_AVAILABLE, characteristic);
-                Log.i(TAG, "Successfully read characteristic.");
+                broadcastUpdate(ACTION_GATT_READ_SUCCESSFUL, characteristic);
+                Log.i(TAG, "onCharacteristicRead: Successfully read characteristic.");
             } else {
-                Log.w(TAG, String.format("Failed to reach characteristic: %d", status));
+                Log.e(TAG, String.format("onCharacteristicRead: Failed to read characteristic: %d", status));
             }
         }
 
@@ -117,110 +119,126 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS && characteristic.getValue() == valueToWrite) {
-                broadcastUpdate(ACTION_GATT_WRITE_SUCCESSFUL);
-                Log.i(TAG, "Successfully wrote to characteristic.");
+                broadcastUpdate(ACTION_GATT_WRITE_SUCCESSFUL, characteristic);
+                Log.i(TAG, "onCharacteristicWrite: Successfully wrote to the characteristic.");
             } else {
-                Log.w(TAG, String.format("Failed to write to characteristic: %d", status));
+                Log.e(TAG, String.format("onCharacteristicWrite: Failed to write to the characteristic: %d", status));
             }
         }
 
         // Runs when a characteristic changes
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            broadcastUpdate(ACTION_GATT_DATA_AVAILABLE, characteristic);
+            broadcastUpdate(ACTION_GATT_CHARACTERISTIC_CHANGED, characteristic);
+            Log.i(TAG, "onCharacteristicChanged: Characteristic changed.");
         }
     };
+    // endregion
 
+    // region Functionality
     // Checks to see if a bluetooth adapter or gatt connection is created
-    public boolean isCreated() {
-        if (bluetoothAdapter == null || bluetoothGatt == null) {
-            Log.w(TAG, "Either the Bluetooth Adapter object or the Gatt Connection hasn't been created.");
-            return false;
+    public boolean notCreated() {
+        if (bluetoothAdapter == null) {
+            Log.e(TAG, "notCreated: The bluetoothAdapter object is null.");
+            return true;
         }
 
-        return true;
+        if (bluetoothGatt == null) {
+            Log.e(TAG, "notCreated: The bluetoothGatt object is null.");
+            return true;
+        }
+
+        return false;
     }
 
-    public List<BluetoothGattService> getSupportedGattService() {
-        if (!isCreated()) {
+    public BluetoothGattService getGattService() {
+        if (notCreated()) {
             return null;
         }
 
-        return bluetoothGatt.getServices();
+        return bluetoothGatt.getService(Common.SERVICE_UUID);
     }
 
     // Reads a characteristic
     public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
-        if (!isCreated()) {
+        if (notCreated()) {
             return;
         }
 
-        bluetoothGatt.readCharacteristic(characteristic);
+        if (bluetoothGatt.readCharacteristic(characteristic)) {
+            Log.i(TAG, "readCharacteristic: Successfully started read operation.");
+        } else {
+            Log.e(TAG, "readCharacteristic: Failed to start read operation.");
+        }
     }
 
     // Writes a characteristic
     public void writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] value) {
-        if (!isCreated()) {
+        if (notCreated()) {
             return;
         }
 
         valueToWrite = value;
 
-        characteristic.setValue(valueToWrite);
-        bluetoothGatt.writeCharacteristic(characteristic);
+        if (bluetoothGatt.writeCharacteristic(characteristic)) {
+            Log.i(TAG, "writeCharacteristic: Successfully started write operation.");
+        } else {
+            Log.e(TAG, "writeCharacteristic: Failed to start write operation.");
+        }
     }
 
     public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic, boolean enabled) {
-        if (!isCreated()) {
+        if (notCreated()) {
             return;
         }
 
         bluetoothGatt.setCharacteristicNotification(characteristic, enabled);
     }
+    // endregion
 
-    public boolean initialize() {
+    // region Connections
+    public boolean connect(final String address) {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter == null) {
-            Log.e(TAG, "Failed to created Bluetooth Adapter.");
+            Log.e(TAG, "connect: The BluetoothAdapter object is null.");
             return false;
         }
 
-        return true;
-    }
-
-    public boolean connect(final String address) {
-        if (bluetoothAdapter == null || address == null) {
+        if (address == null) {
+            Log.e(TAG, "connect: The address provided is null.");
             return false;
         }
 
         try {
             BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
             bluetoothGatt = device.connectGatt(this, false, bluetoothGattCallback);
+            Log.i(TAG, "connect: Connected to BluetoothLeService.");
             return true;
         } catch (IllegalArgumentException exception) {
-            Log.w(TAG, "Unable to connect to the Bluetooth device as the address provided is invalid.");
+            Log.e(TAG, "connect: Unable to connect to the Bluetooth device as the address provided is invalid.");
             return false;
         }
     }
 
     public void disconnect() {
-        if (!isCreated()) {
+        if (notCreated()) {
             return;
         }
 
         bluetoothGatt.disconnect();
-        Log.i(TAG, "GATT server disconnected.");
+        Log.i(TAG, "disconnect: GATT server disconnected.");
     }
 
     private void close() {
-        if (!isCreated()) {
+        if (notCreated()) {
             return;
         }
 
+        disconnect();
         bluetoothGatt.close();
         bluetoothGatt = null;
-        Log.i(TAG, "GATT server closed.");
+        Log.i(TAG, "close: GATT server closed.");
     }
 
     @Override
@@ -228,4 +246,5 @@ public class BluetoothLeService extends Service {
         close();
         return super.onUnbind(intent);
     }
+    // endregion
 }
