@@ -136,7 +136,7 @@ public class BluetoothLeService extends Service {
     // endregion
 
     // region Functionality
-    // Checks to see if a bluetooth adapter or gatt connection is created
+    // Checks to see if the bluetooth adapter or gatt connection has not been created yet
     public boolean notCreated() {
         if (bluetoothAdapter == null) {
             Log.e(TAG, "notCreated: The bluetoothAdapter object is null.");

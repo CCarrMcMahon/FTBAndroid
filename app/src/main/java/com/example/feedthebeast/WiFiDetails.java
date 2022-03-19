@@ -24,7 +24,11 @@ import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.Random;
 
 // Note: Possibly add RecyclerView so user can select what Wi-Fi SSID they want to connect to
@@ -51,6 +55,10 @@ public class WiFiDetails extends AppCompatActivity {
     private Button btn_ReadData;
     private TextView tv_Data;
     private TextView tv_WiFiInfo;
+
+    Queue<Byte> dataQueue = new LinkedList<>();
+    List<Byte> dataList = new ArrayList<>();
+    private boolean finishedWriting = true;
 
     // region Service Handling
     // Callback used to get the status of the BluetoothLeService
@@ -162,6 +170,7 @@ public class WiFiDetails extends AppCompatActivity {
 
     public void gattWriteSuccessful(Intent intent) {
         tv_Data.setText(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+        sendData();
     }
 
     public void gattCharacteristicChanged(Intent intent) {
@@ -207,14 +216,42 @@ public class WiFiDetails extends AppCompatActivity {
             }
         }
 
-        if (gattCharacteristic.setValue(data)) {
+        for (byte value : data) {
+            dataQueue.add(value);
+        }
+
+        sendData();
+    }
+
+    private void sendData() {
+        dataList.clear();
+
+        for (int i = 0; i < 20; i++) {
+            if (dataQueue.peek() == null) {
+                if (i == 0) {
+                    return;
+                }
+
+                break;
+            }
+
+            dataList.add(dataQueue.remove());
+        }
+
+        byte[] bytes = new byte[dataList.size()];
+
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = dataList.get(i);
+        }
+
+        if (gattCharacteristic.setValue(bytes)) {
             Log.i(TAG, "writeData: Successfully set local characteristic value.");
         } else {
             Log.e(TAG, "writeData: Failed to set local characteristic value.");
             return;
         }
 
-        bluetoothLeService.writeCharacteristic(gattCharacteristic, data);
+        bluetoothLeService.writeCharacteristic(gattCharacteristic, bytes);
     }
     // endregion
 
@@ -264,7 +301,7 @@ public class WiFiDetails extends AppCompatActivity {
         bindService(gattServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         Random random = new Random();
-        byte[] bytes = new byte[10];
+        byte[] bytes = new byte[64];
 
         btn_WriteData.setOnClickListener(new View.OnClickListener() {
             @Override
