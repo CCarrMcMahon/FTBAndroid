@@ -26,6 +26,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -95,6 +96,22 @@ public class BluetoothList extends AppCompatActivity {
             }, SCAN_PERIOD);
 
             bluetoothListRVA.clearDevices();
+
+            // Get a list of paired devices
+            Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+
+            if (pairedDevices.size() > 0) {
+                // There are paired devices. Get the name and address of each paired device.
+                for (BluetoothDevice device : pairedDevices) {
+                    Matcher matcher = VALID_DEVICE_REGEX.matcher(String.valueOf(device.getName()));
+
+                    if (matcher.matches()) {
+                        bluetoothListRVA.addToDevices(device);
+                        bluetoothListRVA.notifyDataSetChanged();
+                    }
+                }
+            }
+
             bluetoothLeScanner.startScan(leScanCallback);
             isScanning = true;
             Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
