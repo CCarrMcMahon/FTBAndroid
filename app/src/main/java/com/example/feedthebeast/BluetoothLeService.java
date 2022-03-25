@@ -8,7 +8,10 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -61,17 +64,31 @@ public class BluetoothLeService extends Service {
         byte[] data = characteristic.getValue();
 
         if (data != null && data.length > 0) {
-            StringBuilder stringBuilder = new StringBuilder(data.length);
-
-            for (byte byteChar : data) {
-                stringBuilder.append(String.format("%02X ", byteChar));
-            }
-
-            intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
+            intent.putExtra(EXTRA_DATA, new String(data));
         }
 
         sendBroadcast(intent);
     }
+
+    private final BroadcastReceiver bluetoothStateBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF);
+            final int previousState = intent.getIntExtra(BluetoothAdapter.EXTRA_PREVIOUS_STATE, BluetoothAdapter.STATE_OFF);
+
+            switch (state) {
+                case BluetoothAdapter.STATE_TURNING_OFF:
+                case BluetoothAdapter.STATE_OFF:
+                    if (previousState != BluetoothAdapter.STATE_TURNING_OFF && previousState != BluetoothAdapter.STATE_OFF) {
+                        // The connection is killed by the system, no need to gently disconnect
+                        bluetoothGatt.disconnect();
+                    }
+                    // Calling close() will prevent the STATE_OFF event from being logged (this receiver will be unregistered). But it doesn't matter.
+                    close();
+                    break;
+            }
+        }
+    };
 
     // Callback used to determine what actions should be broadcast
     private final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
@@ -82,6 +99,12 @@ public class BluetoothLeService extends Service {
                 // Successfully connected to the GATT Server
                 broadcastUpdate(ACTION_GATT_CONNECTED);
                 Log.i(TAG, "Connected to the GATT server.");
+
+                IntentFilter intentFilter = new IntentFilter();
+                intentFilter.addAction(BluetoothAdapter.EXTRA_STATE);
+                intentFilter.addAction(BluetoothAdapter.EXTRA_PREVIOUS_STATE);
+
+                registerReceiver(bluetoothStateBroadcastReceiver, intentFilter);
 
                 // Attempt to discover services after successful connection
                 boolean isDiscoveringServices = bluetoothGatt.discoverServices();
@@ -197,7 +220,7 @@ public class BluetoothLeService extends Service {
     // endregion
 
     // region Connections
-    public boolean connect(final String address) {
+    public boolean connect(Context context, String address) {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter == null) {
@@ -212,7 +235,7 @@ public class BluetoothLeService extends Service {
 
         try {
             BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-            bluetoothGatt = device.connectGatt(this, false, bluetoothGattCallback);
+            bluetoothGatt = device.connectGatt(context, false, bluetoothGattCallback);
             Log.i(TAG, "connect: Connected to BluetoothLeService.");
             return true;
         } catch (IllegalArgumentException exception) {
@@ -244,6 +267,7 @@ public class BluetoothLeService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         close();
+        unregisterReceiver(bluetoothStateBroadcastReceiver);
         return super.onUnbind(intent);
     }
     // endregion
