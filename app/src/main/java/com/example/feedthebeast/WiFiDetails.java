@@ -3,6 +3,8 @@ package com.example.feedthebeast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
@@ -15,12 +17,15 @@ import android.content.ServiceConnection;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -41,9 +46,9 @@ public class WiFiDetails extends AppCompatActivity {
     private BluetoothDevice bluetoothDevice;
     private BluetoothLeService bluetoothLeService;
     private String deviceAddress;
+    private String deviceName;
     private BluetoothGattService gattService;
     private BluetoothGattCharacteristic gattCharacteristic;
-    private BluetoothGattCharacteristic notifyCharacteristic;
     private int characteristicProperties;
 
     private Toolbar tb;
@@ -51,14 +56,15 @@ public class WiFiDetails extends AppCompatActivity {
     private TextInputEditText tiet_SSID;
     private TextInputEditText tiet_Password;
     private ProgressBar pb;
-    private Button btn_WriteData;
-    private Button btn_ReadData;
-    private TextView tv_Data;
+    private Button btn_Connect;
     private TextView tv_WiFiInfo;
 
-    Queue<Byte> dataQueue = new LinkedList<>();
-    List<Byte> dataList = new ArrayList<>();
-    private boolean finishedWriting = true;
+    private Queue<Byte> dataQueue = new LinkedList<>();
+    private List<Byte> dataList = new ArrayList<>();
+    private boolean characteristicChanged = false;
+    private String characteristicString = "";
+    private boolean writingData = false;
+    private boolean connecting = false;
 
     // region Service Handling
     // Callback used to get the status of the BluetoothLeService
@@ -78,13 +84,15 @@ public class WiFiDetails extends AppCompatActivity {
         bluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
 
         // Automatically connects to the device upon successful start-up initialization.
-        if (!bluetoothLeService.connect(deviceAddress)) {
+        if (!bluetoothLeService.connect(context, deviceAddress)) {
             finish();
         }
     }
 
     public void serviceDisconnected() {
+        Common.showMessage(context, "Service disconnected.", Toast.LENGTH_SHORT);
         bluetoothLeService = null;
+        finish();
     }
     // endregion
 
@@ -142,7 +150,14 @@ public class WiFiDetails extends AppCompatActivity {
     }
 
     public void gattDisconnected() {
+        Common.showMessage(context, "Gatt disconnected.", Toast.LENGTH_SHORT);
+        registerReceiver(gattUpdateReceiver, makeGattUpdateIntentFilter());
+        Intent gattServiceIntent = new Intent(context, BluetoothLeService.class);
+        bindService(gattServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
+        if (bluetoothLeService != null) {
+            bluetoothLeService.connect(context, deviceAddress);
+        }
     }
 
     public void gattServicesDiscovered() {
@@ -165,16 +180,59 @@ public class WiFiDetails extends AppCompatActivity {
     }
 
     public void gattReadSuccessful(Intent intent) {
-        tv_Data.setText(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+        // tv_Data.setText(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
     }
 
     public void gattWriteSuccessful(Intent intent) {
-        tv_Data.setText(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
         sendData();
     }
 
     public void gattCharacteristicChanged(Intent intent) {
-        tv_Data.setText(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+        characteristicString = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
+        characteristicChanged = true;
+
+        if (characteristicString.equals("Success")) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    // Creating array for parameters
+                    String[] field = new String[3];
+                    field[0] = "mac";
+                    field[1] = "owner";
+                    field[2] = "name";
+
+                    // Creating array for data
+                    String[] data = new String[3];
+                    data[0] = deviceAddress;
+                    data[1] = Common.username;
+                    data[2] = deviceName;
+
+                    PhpHandler phpHandler = new PhpHandler(Common.ADD_FEEDER_URL, "POST", field, data);
+                    phpHandler.sendRequest();
+
+                    if (phpHandler.resultReady()) {
+                        String result = phpHandler.getResult();
+                        Common.showMessage(context, result, Toast.LENGTH_SHORT);
+
+                        switch (result) {
+                            case "You already own this feeder.":
+                            case "Successfully added the feeder.":
+                            case "Failed to add the feeder.":
+                                Intent intent = new Intent(context, FeederList.class);
+                                startActivity(intent);
+                                finish();
+                            default:
+                                break;
+                        }
+                    }
+                }
+            });
+        } else {
+            Common.showMessage(context, "Unable to connect, try again.", Toast.LENGTH_SHORT);
+        }
+
+        pb.setVisibility(View.INVISIBLE);
+        connecting = false;
     }
     // endregion
 
@@ -220,6 +278,8 @@ public class WiFiDetails extends AppCompatActivity {
             dataQueue.add(value);
         }
 
+        writingData = true;
+
         sendData();
     }
 
@@ -229,6 +289,7 @@ public class WiFiDetails extends AppCompatActivity {
         for (int i = 0; i < 20; i++) {
             if (dataQueue.peek() == null) {
                 if (i == 0) {
+                    writingData = false;
                     return;
                 }
 
@@ -272,51 +333,68 @@ public class WiFiDetails extends AppCompatActivity {
         tiet_SSID = findViewById(R.id.tiet_WiFiDetails_SSID);
         tiet_Password = findViewById(R.id.tiet_WiFiDetails_Password);
         pb = findViewById(R.id.pb_WiFiDetails);
-        btn_WriteData = findViewById(R.id.btn_WriteData);
-        btn_ReadData = findViewById(R.id.btn_ReadData);
-        tv_Data = findViewById(R.id.tv_Data);
+        btn_Connect = findViewById(R.id.btn_WiFiDetails);
         tv_WiFiInfo = findViewById(R.id.tv_WiFiInfo);
 
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
 
-        String ip = String.valueOf(wifiInfo.getIpAddress());
-        String mac = wifiInfo.getMacAddress();
         String ssid = wifiInfo.getSSID();
-        String bssid = wifiInfo.getBSSID();
-        String rssi = String.valueOf(wifiInfo.getRssi());
 
         if (getIntent().hasExtra("device")) {
             bluetoothDevice = getIntent().getParcelableExtra("device");
         }
 
-        String btName = bluetoothDevice.getName();
+        deviceName = bluetoothDevice.getName();
         deviceAddress = bluetoothDevice.getAddress();
 
-        tv_WiFiInfo.setText(String.format("Bluetooth Device:\nName: %s\nMAC: %s\n\n" +
-                "Wi-Fi:\nSSID: %s\nIP: %s\nMAC: %s\nBSSID: %s\nRSSI: %s", btName, deviceAddress,
-                ssid, ip, mac, bssid, rssi));
+        tv_WiFiInfo.setText(String.format("Bluetooth Device:\nName: %s\nMAC: %s\n\nWi-Fi:\nSSID: %s", deviceName, deviceAddress, ssid));
 
+        registerReceiver(gattUpdateReceiver, makeGattUpdateIntentFilter());
         Intent gattServiceIntent = new Intent(context, BluetoothLeService.class);
         bindService(gattServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        Random random = new Random();
-        byte[] bytes = new byte[64];
-
-        btn_WriteData.setOnClickListener(new View.OnClickListener() {
+        btn_Connect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // pb.setVisibility(View.VISIBLE);
-                random.nextBytes(bytes);
-                writeData(bytes);
-            }
-        });
+                if (connecting) {
+                    Common.showMessage(context, "Connection in progress, please wait.", Toast.LENGTH_SHORT);
+                    return;
+                }
 
-        btn_ReadData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // pb.setVisibility(View.VISIBLE);
-                readData();
+                String packetID = "_connect";
+                String ssidString = tiet_SSID.getText().toString();
+                String passwordString = tiet_Password.getText().toString();
+
+                if (ssidString.equals("null") || ssidString.equals("")) {
+                    Common.showMessage(context, "Please enter an SSID.", Toast.LENGTH_SHORT);
+                    return;
+                }
+
+                if (passwordString.equals("null") || passwordString.equals("")) {
+                    Common.showMessage(context, "Please enter a Password.", Toast.LENGTH_SHORT);
+                    return;
+                }
+
+                connecting = true;
+                pb.setVisibility(View.VISIBLE);
+
+                String dataString = packetID + ssidString + ((char) 0x1F) + passwordString;
+                writeData(dataString.getBytes());
+
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!characteristicChanged) {
+                            Common.showMessage(context, "No response", Toast.LENGTH_SHORT);
+                        }
+
+                        characteristicChanged = false;
+                        writingData = false;
+                        connecting = false;
+                        pb.setVisibility(View.INVISIBLE);
+                    }
+                }, 15000);
             }
         });
     }
@@ -328,10 +406,10 @@ public class WiFiDetails extends AppCompatActivity {
         registerReceiver(gattUpdateReceiver, makeGattUpdateIntentFilter());
 
         if (bluetoothLeService != null) {
-            boolean result = bluetoothLeService.connect(deviceAddress);
-            Log.d(TAG, String.format("Connection to BluetoothLeService Reestablished: %b", result));
+            bluetoothLeService.connect(context, deviceAddress);
         }
     }
+
 
     @Override
     protected void onPause() {
@@ -340,9 +418,14 @@ public class WiFiDetails extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        bluetoothLeService.disconnect();
         unbindService(serviceConnection);
         bluetoothLeService = null;
     }
