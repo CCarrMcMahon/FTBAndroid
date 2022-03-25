@@ -3,19 +3,24 @@ package com.example.feedthebeast;
 import android.content.Context;
 import android.widget.Toast;
 
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Common {
     // ngrok http 80 <-- Send PHP requests to port 80
-    public static final String BASE_URL = "http://a8e8-69-80-148-181.ngrok.io/FTBServer/login_signup/";
+    public static final String BASE_URL = "http://9d28-69-80-148-110.ngrok.io/FTBServer/login_signup/";
     public static final String SIGNUP_URL = BASE_URL + "SignUp.php";
     public static final String LOGIN_URL = BASE_URL + "LogIn.php";
     public static final String FEEDERS_URL = BASE_URL + "FeederList.php";
+    public static final String ADD_FEEDER_URL = BASE_URL + "AddFeeder.php";
     public static final String EMAIL_EMPTY = "The email must not be empty.";
     public static final String EMAIL_INVALID = "The email provided is invalid.";
     public static final String USERNAME_EMPTY = "The username must not be empty.";
     public static final String PASSWORD_EMPTY = "The password must not be empty.";
+
+    public static final UUID SERVICE_UUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
+    public static final UUID CHARACTERISTIC_UUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
 
     public static String username = "CCarrMcMahon";
 
