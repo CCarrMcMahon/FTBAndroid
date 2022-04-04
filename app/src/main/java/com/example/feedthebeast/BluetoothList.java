@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.Objects;
@@ -162,8 +163,14 @@ public class BluetoothList extends AppCompatActivity {
         // Create the toolbar and add a back button
         toolbar = findViewById(R.id.tb_BluetoothList);
         setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         // Create RecyclerView Adapter to handle displaying information
         bluetoothListRVA = new BluetoothListRVA(context);
