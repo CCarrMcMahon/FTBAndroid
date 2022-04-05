@@ -90,16 +90,14 @@ public class FeederHome extends AppCompatActivity {
 
     public void removeFeeder() {
         // Creating array for parameters
-        String[] field = new String[3];
+        String[] field = new String[2];
         field[0] = "mac";
         field[1] = "owner";
-        field[2] = "name";
 
         // Creating array for data
-        String[] data = new String[3];
+        String[] data = new String[2];
         data[0] = mac;
         data[1] = Common.username;
-        data[2] = name;
 
         PhpHandler phpHandler = new PhpHandler(Common.REMOVE_FEEDER_URL, "POST", field, data);
         phpHandler.sendRequest();

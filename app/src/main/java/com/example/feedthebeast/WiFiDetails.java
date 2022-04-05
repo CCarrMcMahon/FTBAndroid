@@ -308,7 +308,7 @@ public class WiFiDetails extends AppCompatActivity {
         for (int i = 0; i < bytes.length; i++) {
             bytes[i] = dataList.get(i);
         }
-
+        
         if (gattCharacteristic.setValue(bytes)) {
             Log.i(TAG, "writeData: Successfully set local characteristic value.");
         } else {
@@ -366,9 +366,11 @@ public class WiFiDetails extends AppCompatActivity {
                     return;
                 }
 
-                String packetID = "_connect";
+                String packetID = "connect";
+
                 String ssidString = tiet_SSID.getText().toString();
                 String passwordString = tiet_Password.getText().toString();
+                String macString = deviceAddress;
 
                 if (ssidString.equals("null") || ssidString.equals("")) {
                     Common.showMessage(context, "Please enter an SSID.", Toast.LENGTH_SHORT);
@@ -380,10 +382,15 @@ public class WiFiDetails extends AppCompatActivity {
                     return;
                 }
 
+                if (deviceAddress.equals("null") || deviceAddress.equals("")) {
+                    Common.showMessage(context, "Error: MAC address not detected.", Toast.LENGTH_SHORT);
+                    return;
+                }
+
                 connecting = true;
                 pb.setVisibility(View.VISIBLE);
 
-                String dataString = packetID + ",ssid:" + ssidString + "&password:" + passwordString;
+                String dataString = "id:" + packetID + "&ssid:" + ssidString + "&password:" + passwordString + "&mac:" + macString;
                 writeData(dataString.getBytes());
 
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
@@ -398,7 +405,7 @@ public class WiFiDetails extends AppCompatActivity {
                         connecting = false;
                         pb.setVisibility(View.INVISIBLE);
                     }
-                }, 15000);
+                }, 20000);
             }
         });
     }
