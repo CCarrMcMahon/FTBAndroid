@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class FeederHome extends AppCompatActivity {
-    private final static String TAG = WiFiDetails.class.getSimpleName();
+    private final static String TAG = FeederHome.class.getSimpleName();
     private final Context context = this;
 
     private String mac;
@@ -71,7 +71,7 @@ public class FeederHome extends AppCompatActivity {
             }
         });
 
-        feederHomeRVA = new FeederHomeRVA(context);
+        feederHomeRVA = new FeederHomeRVA(context, mac);
 
         rv_FeederHome = findViewById(R.id.rv_FeederHome);
         rv_FeederHome.setAdapter(feederHomeRVA);

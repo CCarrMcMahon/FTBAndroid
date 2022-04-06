@@ -9,13 +9,15 @@ import java.util.regex.Pattern;
 
 public class Common {
     // ngrok http 80 <-- Send PHP requests to port 80
-    public static final String BASE_URL = "http://6d1d-69-80-148-145.ngrok.io/FTBServer/login_signup/";
+    public static final String BASE_URL = "http://dd7d-69-80-148-145.ngrok.io/FTBServer/login_signup/";
     public static final String SIGNUP_URL = BASE_URL + "SignUp.php";
     public static final String LOGIN_URL = BASE_URL + "LogIn.php";
     public static final String FEEDERS_URL = BASE_URL + "FeederList.php";
     public static final String ADD_FEEDER_URL = BASE_URL + "AddFeeder.php";
     public static final String EDIT_NAME_URL = BASE_URL + "EditName.php";
     public static final String REMOVE_FEEDER_URL = BASE_URL + "RemoveFeeder.php";
+    public static final String GET_FEEDING_TIMES_URL = BASE_URL + "GetFeedingTimes.php";
+    public static final String SET_FEEDING_TIMES_URL = BASE_URL + "SetFeedingTimes.php";
     public static final String EMAIL_EMPTY = "The email must not be empty.";
     public static final String EMAIL_INVALID = "The email provided is invalid.";
     public static final String USERNAME_EMPTY = "The username must not be empty.";
