@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FeederList extends AppCompatActivity {
-    private final static String TAG = WiFiDetails.class.getSimpleName();
+    private final static String TAG = FeederList.class.getSimpleName();
     private final Context context = this;
 
     FeederListRVA feederListRVA;
