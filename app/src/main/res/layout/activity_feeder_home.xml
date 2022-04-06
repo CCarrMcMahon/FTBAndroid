@@ -19,7 +19,7 @@
         app:title="Feeder Home" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tv_FeederHome_Name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -41,8 +41,8 @@
         android:maxLength="32"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textView"
-        app:layout_constraintTop_toTopOf="@+id/textView" />
+        app:layout_constraintStart_toEndOf="@+id/tv_FeederHome_Name"
+        app:layout_constraintTop_toTopOf="@+id/tv_FeederHome_Name" />
 
     <Button
         android:id="@+id/btn_FeederHome_Save"
@@ -56,12 +56,93 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/et_FeederName" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_FeederHome"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/border"
+        app:layout_constraintBottom_toTopOf="@+id/et_FeederHome_StartTime"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_FeederHome_FeedingTimes" />
+
+    <TextView
+        android:id="@+id/tv_FeederHome_FeedingTimes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Feeding Times"
+        android:textSize="32sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_FeederHome_Save" />
+
+    <EditText
+        android:id="@+id/et_FeederHome_StartTime"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:focusable="false"
+        android:hint="Start Time"
+        android:singleLine="true"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toStartOf="@+id/et_FeederHome_EndTime"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/et_FeederHome_EndTime" />
+
+    <EditText
+        android:id="@+id/et_FeederHome_EndTime"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:focusable="false"
+        android:hint="End Time"
+        android:singleLine="true"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rv_FeederHome" />
+
+    <EditText
+        android:id="@+id/et_FeederHome_Cups"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Cups"
+        android:inputType="number|numberDecimal"
+        android:maxLength="5"
+        android:singleLine="true"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/et_FeederHome_EndTime"
+        app:layout_constraintTop_toTopOf="@+id/et_FeederHome_EndTime" />
+
+    <Button
+        android:id="@+id/btn_FeederHome_Add"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:text="Add Feeding Time"
+        android:theme="@style/Theme.FeedTheBeast"
+        app:layout_constraintBottom_toTopOf="@+id/btn_FeederHome_Remove"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/et_FeederHome_EndTime"
+        app:layout_constraintVertical_bias="1.0" />
+
     <Button
         android:id="@+id/btn_FeederHome_Remove"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#CF142B"
         android:text="Remove Feeder"
         android:theme="@style/Theme.FeedTheBeast"
         app:layout_constraintBottom_toBottomOf="parent"
