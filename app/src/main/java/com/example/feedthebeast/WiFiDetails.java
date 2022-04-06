@@ -308,7 +308,7 @@ public class WiFiDetails extends AppCompatActivity {
         for (int i = 0; i < bytes.length; i++) {
             bytes[i] = dataList.get(i);
         }
-        
+
         if (gattCharacteristic.setValue(bytes)) {
             Log.i(TAG, "writeData: Successfully set local characteristic value.");
         } else {

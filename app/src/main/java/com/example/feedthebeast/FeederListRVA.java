@@ -98,8 +98,8 @@ public class FeederListRVA extends RecyclerView.Adapter<FeederListRVA.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Feeder feeder = feeders.get(position);
 
-        holder.feederMac.setText(feeders.get(position).getMac());
-        holder.feederName.setText(feeders.get(position).getName());
+        holder.feederMac.setText(feeder.getMac());
+        holder.feederName.setText(feeder.getName());
 
         holder.feederRow.setOnClickListener(new View.OnClickListener() {
             @Override
