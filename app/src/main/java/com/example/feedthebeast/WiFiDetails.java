@@ -390,7 +390,7 @@ public class WiFiDetails extends AppCompatActivity {
                 connecting = true;
                 pb.setVisibility(View.VISIBLE);
 
-                String dataString = "id:" + packetID + "&ssid:" + ssidString + "&password:" + passwordString + "&mac:" + macString;
+                String dataString = "id=" + packetID + "&ssid=" + ssidString + "&password=" + passwordString + "&mac=" + macString;
                 writeData(dataString.getBytes());
 
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
