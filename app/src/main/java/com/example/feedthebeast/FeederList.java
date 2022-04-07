@@ -13,11 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class FeederList extends AppCompatActivity {
     private final static String TAG = FeederList.class.getSimpleName();
     private final Context context = this;
@@ -55,11 +50,14 @@ public class FeederList extends AppCompatActivity {
             }
         });
 
-        btn = findViewById(R.id.btn_FeederList_Scan);
+        btn = findViewById(R.id.btn_FeederList_LogOut);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFeeders(Common.username);
+                Common.username = "";
+                Intent intent = new Intent(context, LogIn.class);
+                startActivity(intent);
+                finish();
             }
         });
     }
