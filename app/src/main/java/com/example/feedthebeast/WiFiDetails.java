@@ -91,7 +91,7 @@ public class WiFiDetails extends AppCompatActivity {
     }
 
     public void serviceDisconnected() {
-        Common.showMessage(context, "Service disconnected.", Toast.LENGTH_SHORT);
+        // Common.showMessage(context, "Service disconnected.", Toast.LENGTH_SHORT);
         bluetoothLeService = null;
         finish();
     }
@@ -151,7 +151,7 @@ public class WiFiDetails extends AppCompatActivity {
     }
 
     public void gattDisconnected() {
-        Common.showMessage(context, "Gatt disconnected.", Toast.LENGTH_SHORT);
+        // Common.showMessage(context, "Gatt disconnected.", Toast.LENGTH_SHORT);
         registerReceiver(gattUpdateReceiver, makeGattUpdateIntentFilter());
         Intent gattServiceIntent = new Intent(context, BluetoothLeService.class);
         bindService(gattServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);

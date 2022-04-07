@@ -26,7 +26,7 @@ public class Common {
     public static final UUID SERVICE_UUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB");
     public static final UUID CHARACTERISTIC_UUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB");
 
-    public static String username = "CCarrMcMahon";
+    public static String username = "";
 
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+" +

@@ -115,7 +115,7 @@ public class BluetoothList extends AppCompatActivity {
 
             bluetoothLeScanner.startScan(leScanCallback);
             isScanning = true;
-            Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
+            // Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
         }
     }
 
@@ -123,7 +123,7 @@ public class BluetoothList extends AppCompatActivity {
         if (isScanning) {
             bluetoothLeScanner.stopScan(leScanCallback);
             isScanning = false;
-            Common.showMessage(context, DISCOVERY_END, Toast.LENGTH_SHORT);
+            // Common.showMessage(context, DISCOVERY_END, Toast.LENGTH_SHORT);
         }
     }
 
