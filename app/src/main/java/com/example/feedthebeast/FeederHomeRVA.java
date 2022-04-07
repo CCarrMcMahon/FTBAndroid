@@ -19,10 +19,12 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
@@ -31,14 +33,16 @@ public class FeederHomeRVA extends RecyclerView.Adapter<FeederHomeRVA.ViewHolder
     private final static String TAG = FeederHomeRVA.class.getSimpleName();
 
     private class FeedingTime {
-        public Calendar startCalendar;
-        public Calendar endCalendar;
+        public String startTime;
+        public String endTime;
         public float cups;
+        public boolean ate;
 
-        public FeedingTime(Calendar startCalendar, Calendar endCalendar, float cups) {
-            this.startCalendar = startCalendar;
-            this.endCalendar = endCalendar;
+        public FeedingTime(String startTime, String endTime, float cups) {
+            this.startTime = startTime;
+            this.endTime = endTime;
             this.cups = cups;
+            this.ate = false;
         }
     }
 
@@ -61,17 +65,23 @@ public class FeederHomeRVA extends RecyclerView.Adapter<FeederHomeRVA.ViewHolder
         }
 
         for (FeedingTime feedingTime: feedingTimes) {
+            Calendar feedingTimeStartCalendar = stringToCalendar(feedingTime.startTime);
+            Calendar feedingTimeEndCalendar = stringToCalendar(feedingTime.endTime);
+
             // Don't let the new time slot overlap with another time slot
-            if (startCalendar.before(feedingTime.endCalendar) && feedingTime.startCalendar.before(endCalendar)) {
+            if (startCalendar.before(feedingTimeEndCalendar) && feedingTimeStartCalendar.before(endCalendar)) {
                 Common.showMessage(parentContext, "The new time slot can't intersect previous time slots.", Toast.LENGTH_SHORT);
                 return;
             }
         }
 
-        FeedingTime feedingTime = new FeedingTime(startCalendar, endCalendar, cups);
+        String startTime = calendarToString(startCalendar);
+        String endTime = calendarToString(endCalendar);
+
+        FeedingTime feedingTime = new FeedingTime(startTime, endTime, cups);
 
         feedingTimes.add(feedingTime);
-        feedingTimes.sort((feedingTime1, feedingTime2) -> feedingTime1.startCalendar.compareTo(feedingTime2.startCalendar));
+        feedingTimes.sort((feedingTime1, feedingTime2) -> stringToCalendar(feedingTime1.startTime).compareTo(stringToCalendar(feedingTime2.endTime)));
 
         setFeedingTimes();
         notifyDataSetChanged();
@@ -80,6 +90,27 @@ public class FeederHomeRVA extends RecyclerView.Adapter<FeederHomeRVA.ViewHolder
     public void clearFeedingTimes() {
         feedingTimes.clear();
         notifyDataSetChanged();
+    }
+
+    public String calendarToString(Calendar calendar) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        return sdf.format(calendar.getTime());
+    }
+
+    public Calendar stringToCalendar(String time) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+        try {
+            Date date = sdf.parse(time);
+            calendar.setTime(date);
+        } catch (ParseException e) {
+            Log.e(TAG, "stringToCalendar: ", e);
+        }
+
+        return calendar;
     }
 
     private void getFeedingTimes() {
@@ -174,8 +205,8 @@ public class FeederHomeRVA extends RecyclerView.Adapter<FeederHomeRVA.ViewHolder
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
 
-        holder.startTime.setText(simpleDateFormat.format(feedingTime.startCalendar.getTime()));
-        holder.endTime.setText(simpleDateFormat.format(feedingTime.endCalendar.getTime()));
+        holder.startTime.setText(simpleDateFormat.format(stringToCalendar(feedingTime.startTime).getTime()));
+        holder.endTime.setText(simpleDateFormat.format(stringToCalendar(feedingTime.endTime).getTime()));
         holder.cups.setText(String.valueOf(feedingTime.cups));
 
         holder.fab.setOnClickListener(new View.OnClickListener() {
