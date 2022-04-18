@@ -23,7 +23,7 @@ public class PhpHandler extends Thread {
     public String[] field;
     public String[] data;
 
-    private String result = "EMPTY";
+    private String result = "";
 
     public String getResult() {
         return this.result;

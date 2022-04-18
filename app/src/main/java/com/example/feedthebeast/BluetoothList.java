@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.Objects;
@@ -114,7 +115,7 @@ public class BluetoothList extends AppCompatActivity {
 
             bluetoothLeScanner.startScan(leScanCallback);
             isScanning = true;
-            Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
+            // Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
         }
     }
 
@@ -122,7 +123,7 @@ public class BluetoothList extends AppCompatActivity {
         if (isScanning) {
             bluetoothLeScanner.stopScan(leScanCallback);
             isScanning = false;
-            Common.showMessage(context, DISCOVERY_END, Toast.LENGTH_SHORT);
+            // Common.showMessage(context, DISCOVERY_END, Toast.LENGTH_SHORT);
         }
     }
 
@@ -162,8 +163,14 @@ public class BluetoothList extends AppCompatActivity {
         // Create the toolbar and add a back button
         toolbar = findViewById(R.id.tb_BluetoothList);
         setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         // Create RecyclerView Adapter to handle displaying information
         bluetoothListRVA = new BluetoothListRVA(context);

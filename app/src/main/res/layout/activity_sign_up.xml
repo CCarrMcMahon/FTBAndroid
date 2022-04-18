@@ -69,12 +69,12 @@
             android:id="@+id/tiet_SignUp_Username"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:digits="@string/alphanumericcustom"
             android:drawableEnd="@drawable/ic_username"
             android:hint="@string/username"
-            android:inputType="textCapSentences"
+            android:inputType="textFilter|textCapSentences"
             android:maxLength="32"
-            android:singleLine="true"
-            android:digits="@string/alphanumericcustom" />
+            android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout

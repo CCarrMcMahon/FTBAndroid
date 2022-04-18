@@ -17,6 +17,7 @@ import android.content.ServiceConnection;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -90,7 +91,7 @@ public class WiFiDetails extends AppCompatActivity {
     }
 
     public void serviceDisconnected() {
-        Common.showMessage(context, "Service disconnected.", Toast.LENGTH_SHORT);
+        // Common.showMessage(context, "Service disconnected.", Toast.LENGTH_SHORT);
         bluetoothLeService = null;
         finish();
     }
@@ -150,7 +151,7 @@ public class WiFiDetails extends AppCompatActivity {
     }
 
     public void gattDisconnected() {
-        Common.showMessage(context, "Gatt disconnected.", Toast.LENGTH_SHORT);
+        // Common.showMessage(context, "Gatt disconnected.", Toast.LENGTH_SHORT);
         registerReceiver(gattUpdateReceiver, makeGattUpdateIntentFilter());
         Intent gattServiceIntent = new Intent(context, BluetoothLeService.class);
         bindService(gattServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -191,7 +192,7 @@ public class WiFiDetails extends AppCompatActivity {
         characteristicString = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
         characteristicChanged = true;
 
-        if (characteristicString.equals("Success")) {
+        if (characteristicString.equals("SUCCESS")) {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
@@ -212,23 +213,26 @@ public class WiFiDetails extends AppCompatActivity {
 
                     if (phpHandler.resultReady()) {
                         String result = phpHandler.getResult();
-                        Common.showMessage(context, result, Toast.LENGTH_SHORT);
 
                         switch (result) {
+                            case "Failed to get your feeders.":
                             case "You already own this feeder.":
                             case "Successfully added the feeder.":
                             case "Failed to add the feeder.":
+                                Common.showMessage(context, result, Toast.LENGTH_SHORT);
                                 Intent intent = new Intent(context, FeederList.class);
                                 startActivity(intent);
                                 finish();
+                                break;
                             default:
+                                Common.showMessage(context, "Unable to connect to the website, try again.", Toast.LENGTH_SHORT);
                                 break;
                         }
                     }
                 }
             });
         } else {
-            Common.showMessage(context, "Unable to connect, try again.", Toast.LENGTH_SHORT);
+            Common.showMessage(context, "Unable to connect to the internet, try again.", Toast.LENGTH_SHORT);
         }
 
         pb.setVisibility(View.INVISIBLE);
@@ -362,9 +366,11 @@ public class WiFiDetails extends AppCompatActivity {
                     return;
                 }
 
-                String packetID = "_connect";
+                String packetID = "connect";
+
                 String ssidString = tiet_SSID.getText().toString();
                 String passwordString = tiet_Password.getText().toString();
+                String macString = deviceAddress;
 
                 if (ssidString.equals("null") || ssidString.equals("")) {
                     Common.showMessage(context, "Please enter an SSID.", Toast.LENGTH_SHORT);
@@ -376,17 +382,22 @@ public class WiFiDetails extends AppCompatActivity {
                     return;
                 }
 
+                if (deviceAddress.equals("null") || deviceAddress.equals("")) {
+                    Common.showMessage(context, "Error: MAC address not detected.", Toast.LENGTH_SHORT);
+                    return;
+                }
+
                 connecting = true;
                 pb.setVisibility(View.VISIBLE);
 
-                String dataString = packetID + ssidString + ((char) 0x1F) + passwordString;
+                String dataString = "id=" + packetID + "&ssid=" + ssidString + "&password=" + passwordString + "&mac=" + macString;
                 writeData(dataString.getBytes());
 
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if (!characteristicChanged) {
-                            Common.showMessage(context, "No response", Toast.LENGTH_SHORT);
+                            Common.showMessage(context, "No response from the feeder.", Toast.LENGTH_SHORT);
                         }
 
                         characteristicChanged = false;
@@ -394,7 +405,7 @@ public class WiFiDetails extends AppCompatActivity {
                         connecting = false;
                         pb.setVisibility(View.INVISIBLE);
                     }
-                }, 15000);
+                }, 20000);
             }
         });
     }

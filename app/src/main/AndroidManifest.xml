@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.feedthebeast">
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <uses-feature android:name="android.hardware.type.watch" />
     <!--
         Needed to perform any Bluetooth classic of BLE communication, such as requesting a
         connection, accepting a connection, and transferring data.
@@ -32,6 +35,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FeedTheBeast"
         android:usesCleartextTraffic="true">
+
         <service
             android:name=".BluetoothLeService"
             android:enabled="true"
@@ -64,7 +68,12 @@
             android:parentActivityName=".BluetoothList"
             android:theme="@style/Theme.FeedTheBeast" />
         <activity
+            android:name=".FeederHome"
+            android:parentActivityName=".FeederList"
+            android:theme="@style/Theme.FeedTheBeast" />
+        <activity
             android:name=".MainActivity"
             android:theme="@style/Theme.FeedTheBeast" />
     </application>
+
 </manifest>
