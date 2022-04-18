@@ -7,5 +7,13 @@
     <string name="signup">Sign Up</string>
     <string name="newuser">New User? <u>Click here</u> to create an account.</string>
     <string name="existinguser">Existing User? <u>Click here</u> to login in.</string>
-
+    <string name="start_scanning">Start Scanning</string>
+    <string name="empty">Empty</string>
+    <string name="alphanumericcustom">abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789-_.\'</string>
+    <string name="fab_devices_add">Click to add a new device to your account.</string>
+    <string name="scan">Scan</string>
+    <string name="enterwifidetails">Enter the details of the Wi-Fi network that your feeder will connect to so it can access the internet.</string>
+    <string name="ssid">SSID</string>
+    <string name="connect">Connect</string>
+    <string name="wifiinfo">TextView</string>
 </resources>

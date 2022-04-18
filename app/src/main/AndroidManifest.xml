@@ -2,6 +2,29 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.feedthebeast">
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <uses-feature android:name="android.hardware.type.watch" />
+    <!--
+        Needed to perform any Bluetooth classic of BLE communication, such as requesting a
+        connection, accepting a connection, and transferring data.
+    -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!--
+        Is necessary because, on Android 11 and lower, a Bluetooth scan could potentially be used
+        to gather information about the location of the user.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Needed to initiate device discovery or manipulate Bluetooth settings -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!--
+        Requires the users device to need a Bluetooth module. Will not appear on app store if users
+        do not have Bluetooth.
+    -->
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="true" /> <!-- Needed to start a Wi-Fi scan -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" /> <!-- Needed to get Wi-Fi information and results -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- Needed to access the internet -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -10,23 +33,47 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.FeedTheBeast">
+        android:theme="@style/Theme.FeedTheBeast"
+        android:usesCleartextTraffic="true">
 
-        <activity android:name=".LogIn"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <service
+            android:name=".BluetoothLeService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name=".LogIn"
+            android:theme="@style/Theme.FeedTheBeast">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".SignUp"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-
-        <activity android:name=".MainActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".SignUp"
+            android:parentActivityName=".LogIn"
+            android:theme="@style/Theme.FeedTheBeast" />
+        <activity
+            android:name=".FeederList"
+            android:parentActivityName=".LogIn"
+            android:theme="@style/Theme.FeedTheBeast">
+        </activity>
+        <activity
+            android:name=".BluetoothList"
+            android:parentActivityName=".FeederList"
+            android:theme="@style/Theme.FeedTheBeast" />
+        <activity
+            android:name=".WiFiDetails"
+            android:parentActivityName=".BluetoothList"
+            android:theme="@style/Theme.FeedTheBeast" />
+        <activity
+            android:name=".FeederHome"
+            android:parentActivityName=".FeederList"
+            android:theme="@style/Theme.FeedTheBeast" />
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/Theme.FeedTheBeast" />
     </application>
 
 </manifest>

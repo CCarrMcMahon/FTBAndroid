@@ -4,68 +4,73 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LogIn">
+    tools:context=".WiFiDetails">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_LogIn"
-        android:layout_width="match_parent"
+        android:id="@+id/tb_WiFiDetails"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorAccent"
         android:elevation="4dp"
         android:minHeight="?attr/actionBarSize"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="Wi-Fi Details" />
 
     <TextView
-        android:id="@+id/tv_LogIn_LogIn"
+        android:id="@+id/tv_WiFiDetails_Title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
-        android:text="@string/login"
+        android:layout_marginEnd="8dp"
+        android:text="@string/enterwifidetails"
         android:textAlignment="center"
         android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_LogIn" />
+        app:layout_constraintTop_toBottomOf="@+id/tb_WiFiDetails" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_LogIn_Username"
+        android:id="@+id/til_WiFiDetails_SSID"
         android:layout_width="0dp"
         android:layout_height="64dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_LogIn_LogIn">
+        app:layout_constraintTop_toBottomOf="@+id/tv_WiFiDetails_Title">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/tiet_LogIn_Username"
+            android:id="@+id/tiet_WiFiDetails_SSID"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:digits="@string/alphanumericcustom"
             android:drawableEnd="@drawable/ic_username"
-            android:hint="@string/username"
-            android:inputType="textFilter"
-            android:maxLength="32"
+            android:hint="@string/ssid"
+            android:inputType="text"
+            android:maxLength="64"
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_LogIn_Password"
+        android:id="@+id/til_WiFiDetails_Password"
         android:layout_width="0dp"
         android:layout_height="64dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/til_LogIn_Username">
+        app:layout_constraintTop_toBottomOf="@+id/til_WiFiDetails_SSID">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/tiet_LogIn_Password"
+            android:id="@+id/tiet_WiFiDetails_Password"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:drawableEnd="@drawable/ic_password"
@@ -73,10 +78,11 @@
             android:inputType="textPassword"
             android:maxLength="64"
             android:singleLine="true" />
+
     </com.google.android.material.textfield.TextInputLayout>
 
     <ProgressBar
-        android:id="@+id/pb_LogIn_ProgressBar"
+        android:id="@+id/pb_WiFiDetails"
         style="?android:attr/progressBarStyle"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -84,32 +90,34 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/til_LogIn_Password" />
+        app:layout_constraintTop_toBottomOf="@+id/til_WiFiDetails_Password" />
 
     <Button
-        android:id="@+id/btn_LogIn_LogIn"
+        android:id="@+id/btn_WiFiDetails"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
-        android:text="@string/login"
+        android:text="@string/connect"
         android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pb_LogIn_ProgressBar" />
+        app:layout_constraintTop_toBottomOf="@+id/pb_WiFiDetails" />
 
     <TextView
-        android:id="@+id/tv_LogIn_NewUser"
-        android:layout_width="wrap_content"
+        android:id="@+id/tv_WiFiInfo"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/newuser"
-        android:textSize="16sp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/wifiinfo"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_LogIn_LogIn" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_WiFiDetails" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
