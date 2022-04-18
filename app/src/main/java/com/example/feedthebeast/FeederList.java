@@ -1,5 +1,6 @@
 package com.example.feedthebeast;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -12,12 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class FeederList extends AppCompatActivity {
+    private final static String TAG = FeederList.class.getSimpleName();
+    private final Context context = this;
+
     FeederListRVA feederListRVA;
 
     Toolbar toolbar;
@@ -31,7 +30,7 @@ public class FeederList extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feeder_list);
 
-        feederListRVA = new FeederListRVA();
+        feederListRVA = new FeederListRVA(context);
 
         toolbar = findViewById(R.id.tb_FeederList);
         setSupportActionBar(toolbar);
@@ -51,19 +50,24 @@ public class FeederList extends AppCompatActivity {
             }
         });
 
-        btn = findViewById(R.id.btn_FeederList_Scan);
+        btn = findViewById(R.id.btn_FeederList_LogOut);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFeeders(Common.username);
+                Common.username = "";
+                Intent intent = new Intent(context, LogIn.class);
+                startActivity(intent);
+                finish();
             }
         });
     }
 
     public void getFeeders(String username) {
+        feederListRVA.clearFeeders();
+
         // Creating array for parameters
         String[] field = new String[1];
-        field[0] = "username";
+        field[0] = "owner";
 
         // Creating array for data
         String[] data = new String[1];
@@ -76,17 +80,24 @@ public class FeederList extends AppCompatActivity {
         if (phpHandler.resultReady()) {
             String result = phpHandler.getResult();
 
-            String[] result_array = result.split("\n");
-
-            if (result_array.length == 1 && result_array[0].equals("")) {
-                feederListRVA.names.clear();
-            } else if (result_array[0].equals("No feeders found.")) {
-                feederListRVA.names.clear();
-            } else {
-                feederListRVA.names = Arrays.asList(result_array);
+            // Catches if web server is not running
+            if (result.isEmpty()) {
+                return;
             }
 
-            feederListRVA.notifyDataSetChanged();
+            if (result.contains("Error: ")) {
+                return;
+            }
+
+            if (result.equals("No feeders found.")) {
+                return;
+            }
+
+            String[] result_array = result.split("\n");
+
+            for (int i = 0; i < result_array.length; i += 2) {
+                feederListRVA.addToFeeders(result_array[i], result_array[i + 1]);
+            }
         }
     }
 }
