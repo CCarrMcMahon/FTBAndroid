@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -98,24 +99,9 @@ public class BluetoothList extends AppCompatActivity {
 
             bluetoothListRVA.clearDevices();
 
-            // Get a list of paired devices
-            Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-
-            if (pairedDevices.size() > 0) {
-                // There are paired devices. Get the name and address of each paired device.
-                for (BluetoothDevice device : pairedDevices) {
-                    Matcher matcher = VALID_DEVICE_REGEX.matcher(String.valueOf(device.getName()));
-
-                    if (matcher.matches()) {
-                        bluetoothListRVA.addToDevices(device);
-                        bluetoothListRVA.notifyDataSetChanged();
-                    }
-                }
-            }
-
             bluetoothLeScanner.startScan(leScanCallback);
             isScanning = true;
-            // Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
+            Common.showMessage(context, DISCOVERY_START, Toast.LENGTH_SHORT);
         }
     }
 
@@ -123,7 +109,7 @@ public class BluetoothList extends AppCompatActivity {
         if (isScanning) {
             bluetoothLeScanner.stopScan(leScanCallback);
             isScanning = false;
-            // Common.showMessage(context, DISCOVERY_END, Toast.LENGTH_SHORT);
+            Common.showMessage(context, DISCOVERY_END, Toast.LENGTH_SHORT);
         }
     }
 
@@ -151,14 +137,6 @@ public class BluetoothList extends AppCompatActivity {
 
         // Users need to allow access to location for Bluetooth
         checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, 0);
-
-        // Register for broadcasts when a device is discovered.
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(BluetoothDevice.ACTION_FOUND);
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-
-        // registerReceiver(discovery_receiver, filter);
 
         // Create the toolbar and add a back button
         toolbar = findViewById(R.id.tb_BluetoothList);
